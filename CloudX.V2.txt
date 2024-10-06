@@ -1,0 +1,125 @@
+						 	CloudX.V2
+
+
++++++++++++++++++++++++++++++++++++++++++++++
+Step 1: Install Terraform
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+sudo apt update
+
+sudo apt install -y software-properties-common gnupg
+
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+
+sudo apt update && sudo apt install terraform
+
+terraform -version
+
++++++++++++++++++++++++++++++++++++++++++++++
+Step 2: Install OpenStack Terraform Provider
++++++++++++++++++++++++++++++++++++++++++++++
+
+mkdir openstack-terraform && cd openstack-terraform
+
++++++++++++++++++++++++++++++++++++++++++++++
+Step 3: Define OpenStack Instance in Terraform
++++++++++++++++++++++++++++++++++++++++++++++
+
+nano main.tf
+
+==================================================================================================
+==================================================================================================
+==================================================================================================
+
+terraform {
+  required_providers {
+    openstack = {
+      source  = "terraform-provider-openstack/openstack"
+      version = "~> 1.0"
+    }
+  }
+}
+
+provider "openstack" {
+  # Configuration options, like authentication, go here
+  auth_url    = "http://your-openstack-auth-url:5000/v3"
+  user_name    = "your-username"
+  password    = "your-password"
+  tenant_name = "your-tenant-name"
+  domain_name = "your-domain-name"
+}
+
+
+resource "openstack_compute_instance_v2" "terraform_instance" {
+  name        = "terraform-instance"
+  image_id    = "<image-id>"
+  flavor_id   = "<flavor-id>"
+  key_pair    = "my-key-pair"
+  security_groups = ["default"]
+
+  network {
+    uuid = "<network-uuid>"
+  }
+}
+
+output "instance_ip" {
+  value = openstack_compute_instance_v2.terraform_instance.access_ip_v4
+}
+
+==================================================================================================
+==================================================================================================
+==================================================================================================
+
+
++++++++++++++++++++++++++++++++++++++++++++++
+Step 4: Obtain OpenStack Details
++++++++++++++++++++++++++++++++++++++++++++++
+
+openstack image list
+
+openstack flavor list
+
+openstack network list
+ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use this command to get your auth_url 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+openstack endpoint list | grep keystone
+
+
++++++++++++++++++++++++++++++++++++++++++++++
+Step 5: Initialize Terraform
++++++++++++++++++++++++++++++++++++++++++++++
+
+terraform init
+
+terraform plan
+
+terraform apply
+
++++++++++++++++++++++++++++++++++++++++++++++
+Step 7: Verify the Instance Creation
++++++++++++++++++++++++++++++++++++++++++++++
+
+openstack server list
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+in case of any errors
+Ensure that your instance is in the "ACTIVE" state.
+You can check this using the command:
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+
+openstack server show <instance_id>
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+you can get your instance id using this command :)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+
+openstack server list
